@@ -25,10 +25,20 @@ public enum CustomHttpStatus {
 
     private final int value;
 
+    /**
+     * Initializes the enum constant with its associated numeric HTTP-like status code.
+     *
+     * @param newValue the integer status code assigned to this enum constant
+     */
     CustomHttpStatus(final int newValue) {
         value = newValue;
     }
 
+    /**
+     * Retrieve the integer status code associated with this enum constant.
+     *
+     * @return the integer HTTP-like status code for this constant
+     */
     public int value() {
         return value;
     }

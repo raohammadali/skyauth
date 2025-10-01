@@ -26,17 +26,34 @@ public abstract class Auditable {
     @Column(name = "deleted_at", nullable = true)
     private LocalDateTime deletedAt;
     
+    /**
+     * Initialize audit timestamps when the entity is first persisted.
+     *
+     * Sets {@code createdAt} and {@code updatedAt} to the current local date-time
+     * immediately before the entity is persisted.
+     */
     @PrePersist
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
     }
  
+    /**
+     * Sets the `updatedAt` timestamp to the current time just before the entity is updated.
+     *
+     * Called as a JPA `@PreUpdate` lifecycle callback.
+     */
     @PreUpdate
     protected void onUpdate() {
         this.updatedAt = LocalDateTime.now();
     }
  
+    /**
+     * Populate the entity's `deletedAt` timestamp immediately before it is removed.
+     *
+     * This method is invoked as a JPA `@PreRemove` lifecycle callback and sets
+     * `deletedAt` to the current system time.
+     */
     @PreRemove
     protected void onDelete() {
         this.deletedAt = LocalDateTime.now();

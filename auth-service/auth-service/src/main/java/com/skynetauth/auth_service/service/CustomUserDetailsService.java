@@ -43,6 +43,16 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final DistributionRepository distributionRepository;
     private final HashIdUtil hashIdUtil;
 
+    /**
+     * Creates a CustomUserDetailsService with the required repositories, password encoder, distribution repository, and hash ID utility.
+     *
+     * @param userRepository the repository for user persistence and retrieval
+     * @param roleRepository the repository for role persistence and retrieval
+     * @param permissionRepository the repository for permission persistence and retrieval
+     * @param passwordEncoder the password encoder used to encode and verify user passwords
+     * @param distributionRepository the repository for distribution persistence and retrieval
+     * @param hashIdUtil utility for encoding and decoding hashed IDs used by the service
+     */
     public CustomUserDetailsService(
             UserRepository userRepository,
             RoleRepository roleRepository,
@@ -58,6 +68,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         this.hashIdUtil = hashIdUtil;
     }
 
+    /**
+     * Load user details by email for Spring Security authentication.
+     *
+     * @param email the email address of the user to load
+     * @return a UserDetails whose username is the user's email, password is the stored password, and authorities are derived from the user's roles
+     * @throws UsernameNotFoundException if no user exists with the given email
+     */
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userRepository.findByEmail(email)
@@ -73,6 +90,23 @@ public class CustomUserDetailsService implements UserDetailsService {
                 authorities);
     }
 
+    /**
+     * Create a new user from the provided signup request and persist it with its roles,
+     * permissions, and distributions.
+     *
+     * The method decodes role, permission, and distribution IDs from the request, validates
+     * them (including that requested distributions are permitted for the current authenticated
+     * admin), encodes the password, links the user to distributions, and saves the user and
+     * affected distributions.
+     *
+     * @param signupRequest contains the new user's details (first name, last name, phone, email,
+     *                      plaintext password), hashed role/distribution/permission IDs, and user type
+     * @return the persisted User populated with assigned roles, permissions, and distributions
+     * @throws EmailAlreadyUsedException if the requested email is already in use
+     * @throws InvalidIDException if any provided role, permission, or distribution ID is invalid,
+     *                            or if distribution assignments exceed the admin's permitted distributions
+     * @throws UserNotFoundException if the currently authenticated admin user cannot be found
+     */
     @Transactional
     public User createUser(SignupRequest signupRequest) throws EmailAlreadyUsedException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -141,10 +175,30 @@ public class CustomUserDetailsService implements UserDetailsService {
         return userRepository.save(savedUser);
     }
 
+    /**
+     * Retrieve a paginated list of users according to the provided paging and sorting criteria.
+     *
+     * @param pageable paging and sorting information for the query
+     * @return a page of User entities matching the requested page and sort parameters
+     */
     public Page<User> getUsers(Pageable pageable) {
         return userRepository.findAll(pageable);
     }
 
+    /**
+     * Update an existing user's basic information, assigned roles, permissions, and distributions.
+     *
+     * The method resolves role, permission, and distribution IDs from the DTO (using hashed IDs),
+     * validates existence and counts, ensures the user's membership in each distribution, persists
+     * updated distributions, and saves the updated user entity.
+     *
+     * @param dto the update payload containing user fields and lists of hashed IDs for roles, permissions, and distributions
+     * @param id  the numeric id of the user to update
+     * @return the updated and persisted User
+     * @throws UserNotFoundException      if no user exists with the given id
+     * @throws EmailAlreadyUsedException  if the requested email is already taken by another user
+     * @throws InvalidIDException         if any provided role, permission, or distribution id cannot be decoded or does not exist
+     */
     public User editUser(UpdateRequest dto, Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(UserNotFoundException::new);

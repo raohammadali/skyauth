@@ -26,6 +26,12 @@ public class RoleController extends BaseController {
     private final RoleService roleService;
     private final RoleMapper roleMapper;
 
+    /**
+     * Create a RoleController with the specified service and mapper.
+     *
+     * @param roleService service used to retrieve Role data
+     * @param roleMapper  mapper used to convert Role entities to RoleDto instances
+     */
     public RoleController(RoleService roleService, RoleMapper roleMapper) {
         this.roleService = roleService;
         this.roleMapper = roleMapper;
@@ -40,7 +46,12 @@ public class RoleController extends BaseController {
     //     } catch (Exception e) {
     //         return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.E_UNAUTHORIZED);
     //     }
-    // }
+    /**
+     * Retrieve the roles available for the specified user type.
+     *
+     * @param userType the user type to filter roles by
+     * @return a ResponseEntity whose body is an ApiResponse containing the list of RoleDto for the specified user type; response uses HTTP 200 (OK) and custom status S_ROLE
+     */
 
     @GetMapping("/roles")
     public ResponseEntity<ApiResponse<List<RoleDto>>> getRolesByUserType(@RequestParam UserType userType) {
