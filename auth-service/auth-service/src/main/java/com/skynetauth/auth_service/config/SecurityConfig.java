@@ -28,9 +28,28 @@ import com.skynetauth.auth_service.utils.JwtUtil;
 public class SecurityConfig {
     private final JwtUtil jwtTokenProvider;
 
+    /**
+     * Create a SecurityConfig that configures application security and integrates JWT support.
+     *
+     * @param jwtTokenProvider utility used to create, validate, and parse JWTs for authentication handling
+     */
     public SecurityConfig(JwtUtil jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
+    /**
+     * Configure and build the application's SecurityFilterChain with JWT authentication, stateless sessions, and request authorization rules.
+     *
+     * The chain:
+     * - enables default CORS and disables CSRF,
+     * - uses RestAuthenticationEntryPoint for authentication failures,
+     * - permits unauthenticated access to specified public and Swagger-related endpoints (including GET /api/auth/**),
+     * - requires authentication for all other requests,
+     * - enforces stateless session management, and
+     * - installs a JwtAuthenticationFilter before the UsernamePasswordAuthenticationFilter.
+     *
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs while configuring HTTP security
+     */
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -69,6 +88,14 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Creates an AuthenticationManager backed by a DaoAuthenticationProvider.
+     *
+     * <p>The provider is configured to load user details from the supplied UserDetailsService
+     * and to verify passwords with the supplied PasswordEncoder.</p>
+     *
+     * @return an AuthenticationManager that authenticates using the provided UserDetailsService and PasswordEncoder
+     */
     @Bean
     public AuthenticationManager authenticationManager(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
@@ -77,6 +104,11 @@ public class SecurityConfig {
 
         return new ProviderManager(authenticationProvider);
     }
+    /**
+     * Provides a BCrypt-based PasswordEncoder for encoding and verifying user passwords.
+     *
+     * @return a PasswordEncoder that uses the BCrypt hashing algorithm
+     */
     @Bean
     public static PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();

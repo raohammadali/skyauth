@@ -21,6 +21,14 @@ public class KafkaProducerConfig {
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
+    /**
+     * Create a ProducerFactory configured for producing UserEventDto messages to Kafka.
+     *
+     * Configures the bootstrap servers and sets the key serializer to StringSerializer and
+     * the value serializer to JsonSerializer for serializing UserEventDto payloads.
+     *
+     * @return a ProducerFactory<String, UserEventDto> configured with string keys and JSON-serialized values
+     */
     @Bean
     public ProducerFactory<String, UserEventDto> producerFactory() {
         Map<String, Object> configProps = new HashMap<>();
@@ -30,6 +38,11 @@ public class KafkaProducerConfig {
         return new DefaultKafkaProducerFactory<>(configProps);
     }
 
+    /**
+     * Provides a KafkaTemplate for sending UserEventDto messages keyed by String.
+     *
+     * @return a KafkaTemplate<String, UserEventDto> for producing messages to Kafka topics
+     */
     @Bean
     public KafkaTemplate<String, UserEventDto> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());

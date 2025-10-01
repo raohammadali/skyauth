@@ -30,6 +30,9 @@ public class UserSeeder implements ApplicationRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(UserSeeder.class);
 
+    /**
+     * Constructs a UserSeeder with the required repositories and password encoder for seeding operations.
+     */
     @Autowired
     public UserSeeder(UserRepository userRepository, RoleRepository roleRepository,
             PermissionRepository permissionRepository, PasswordEncoder passwordEncoder) {
@@ -39,6 +42,16 @@ public class UserSeeder implements ApplicationRunner {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Orchestrates initial data seeding based on the "seeder" application argument.
+     *
+     * Invokes the corresponding seeding routines for any of "user", "role", or "permission"
+     * included in the comma-separated value of the first "seeder" option and exits the JVM
+     * after running requested seeders. If no "seeder" option is provided, logs that no seeders ran.
+     *
+     * @param args application arguments; the "seeder" option should provide a comma-separated list
+     *             (e.g., "user,role,permission") in its first value to indicate which seeders to run
+     */
     @Override
     public void run(ApplicationArguments args) throws Exception {
         if (args.getOptionValues("seeder") != null) {
@@ -58,6 +71,11 @@ public class UserSeeder implements ApplicationRunner {
         }
     }
 
+    /**
+     * Seeds three initial users (Super Admin, Admin, Normal User) with encoded passwords, assigns each the corresponding role and permissions, and persists them to the user repository.
+     *
+     * <p>Creates users with emails superadmin@example.com, admin@example.com, and user@example.com; failures are logged.</p>
+     */
     private void userSeeder() {
         try {
             Role superAdmin = roleRepository.findByName("SUPERADMIN").orElse(new Role());
@@ -98,6 +116,16 @@ public class UserSeeder implements ApplicationRunner {
         }
     }
 
+    /**
+     * Creates and persists the initial roles used by the application.
+     *
+     * Seeds three roles with their associated permissions and user types:
+     * - SUPERADMIN: permissions READ, WRITE, CAN_CREATE_USERS; user type ADMIN
+     * - ADMIN: permissions READ, WRITE; user type ADMIN
+     * - USER: permission READ; user type USER
+     *
+     * The created roles are saved to the role repository.
+     */
     private void roleSeeder() {
         try {
             Permission read = permissionRepository.findByName("READ");
@@ -129,6 +157,12 @@ public class UserSeeder implements ApplicationRunner {
         }
     }
 
+    /**
+     * Seeds default permissions into the permission repository.
+     *
+     * Creates and persists the permissions "READ" (UserType.USER), "WRITE" (UserType.ADMIN),
+     * and "CAN CREATE USERS" (UserType.ADMIN), logging each seeded permission and any failure.
+     */
     private void permissionSeeder() {
         try {
             List<Permission> permissions = Arrays.asList(

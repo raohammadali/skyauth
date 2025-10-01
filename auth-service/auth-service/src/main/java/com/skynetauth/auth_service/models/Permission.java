@@ -24,6 +24,12 @@ public class Permission extends Auditable {
     private String name;
     private UserType userType;
 
+    /**
+     * Creates a Permission with the specified name and associated user type.
+     *
+     * @param name the permission name
+     * @param userType the user type this permission applies to
+     */
     public Permission(String name, UserType userType) {
         this.name = name;
         this.userType = userType;

@@ -14,6 +14,11 @@ import java.util.List;
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Create a configured OpenAPI instance for the application's REST API.
+     *
+     * @return an OpenAPI instance configured with a server at http://127.0.0.1:8080/auth-service, a security requirement referencing an HTTP Bearer (JWT) security scheme named "Bearer Authentication", and API metadata (title "SKYNET AUTH REST API", version "1.0").
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         
@@ -28,6 +33,11 @@ public class OpenApiConfig {
             .info(new Info().title("SKYNET AUTH REST API").version("1.0"));
     }
 
+    /**
+     * Creates a SecurityScheme configured for HTTP Bearer JWT authentication.
+     *
+     * @return a SecurityScheme configured for HTTP Bearer authentication using JWT tokens
+     */
     private SecurityScheme createAPIKeyScheme() {
         return new SecurityScheme()
             .type(SecurityScheme.Type.HTTP)

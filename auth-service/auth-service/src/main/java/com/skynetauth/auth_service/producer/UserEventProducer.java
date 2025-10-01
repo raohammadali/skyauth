@@ -14,6 +14,13 @@ public class UserEventProducer {
     @Autowired
     private KafkaTemplate<String, UserEventDto> kafkaTemplate;
 
+    /**
+     * Publishes a "user created" event to the configured Kafka topic.
+     *
+     * The event payload contains the user's first name, last name, and phone number and is sent to the "logs" topic.
+     *
+     * @param user the user whose data will be published as the event payload
+     */
     public void sendUserCreatedEvent(User user) {
         System.out.println(String.format("Producing user created event for user: %s", user.getFirstName()));
         UserEventDto userEvent = new UserEventDto();

@@ -25,6 +25,9 @@ public class PermissionController extends BaseController {
     private final PermissionService permissionService;
     private final PermissionMapper permissionMapper;
 
+    /**
+     * Create a PermissionController with the required service and mapper dependencies.
+     */
     public PermissionController(PermissionService permissionService, PermissionMapper permissionMapper) {
         this.permissionService = permissionService;
         this.permissionMapper = permissionMapper;
@@ -39,7 +42,14 @@ public class PermissionController extends BaseController {
     //     } catch (Exception e) {
     //         return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.E_UNAUTHORIZED);
     //     }
-    // }
+    /**
+     * Retrieve permissions available for the specified user type.
+     *
+     * @param userType the user type whose permissions should be returned
+     * @return a ResponseEntity containing an ApiResponse with a list of PermissionDto when successful;
+     *         on failure, an ApiResponse with `null` data, `success = false`, HTTP 500 (INTERNAL_SERVER_ERROR),
+     *         and CustomHttpStatus.E_UNAUTHORIZED
+     */
     
     @GetMapping("/permissions")
     public ResponseEntity<ApiResponse<List<PermissionDto>>> getAllPermissions(@RequestParam UserType userType) {

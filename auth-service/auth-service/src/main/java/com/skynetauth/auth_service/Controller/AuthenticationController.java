@@ -52,6 +52,13 @@ public class AuthenticationController extends BaseController {
 
     private final HashIdUtil hashIdUtil;
 
+    /**
+     * Creates an AuthenticationController and initializes its required dependencies.
+     *
+     * @param userService the user management service used to create, edit, and fetch users
+     * @param authService the authentication service used for login and impersonation operations
+     * @param hashIdUtil utility for encoding and decoding hashed identifiers
+     */
     public AuthenticationController(CustomUserDetailsService userService,
             AuthenticationService authService, HashIdUtil hashIdUtil) {
         this.userService = userService;
@@ -59,6 +66,12 @@ public class AuthenticationController extends BaseController {
         this.hashIdUtil = hashIdUtil;
     }
 
+    /**
+     * Authenticate a user and produce a standardized login response.
+     *
+     * @param loginRequest the credentials and user type for authentication
+     * @return an ApiResponse containing the LoginResponse on successful authentication with HTTP 200 and status S_LOGIN
+     */
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest loginRequest) {
         LoginResponse loginResponse = authService.authenticate(loginRequest.getEmail(),
@@ -68,6 +81,12 @@ public class AuthenticationController extends BaseController {
                 HttpStatus.OK, CustomHttpStatus.S_LOGIN);
     }
 
+    /**
+     * Create a new user from the provided signup request.
+     *
+     * @param signupRequest the signup details used to create the new user
+     * @return a ResponseEntity containing an ApiResponse with the created UserResponse, HTTP 200 status, and CustomHttpStatus.S_SIGNUP
+     */
     @PreAuthorize("hasAuthority('CAN_CREATE_USERS')")
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<UserResponse>> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
@@ -77,6 +96,14 @@ public class AuthenticationController extends BaseController {
                 HttpStatus.OK, CustomHttpStatus.S_SIGNUP);
     }
 
+    /**
+     * Updates an existing user's data identified by a hashed id.
+     *
+     * @param dto the update payload with the user's new field values
+     * @param id  the hashed identifier of the user to update
+     * @return a ResponseEntity containing an ApiResponse with the updated UserResponse
+     * @throws InvalidIDException if the provided `id` cannot be decoded to a valid user identifier
+     */
     @PostMapping("/update/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> editUser(@RequestBody @Valid UpdateRequest dto,
             @PathVariable String id) {
@@ -90,6 +117,13 @@ public class AuthenticationController extends BaseController {
         }
     }
 
+    /**
+     * Performs an impersonation login for the user identified by the provided email.
+     *
+     * @param impersonateRequest request containing the target user's email to impersonate
+     * @param request HTTP servlet request for the current request context
+     * @return an ApiResponse containing the `LoginResponse` when impersonation succeeds; on failure, an ApiResponse with `null` data and `success = false`
+     */
     @PostMapping("/impersonate/login")
     @PreAuthorize("hasAuthority('IMPERSONATE')")
     public ResponseEntity<ApiResponse<LoginResponse>> impersonateLogin(
@@ -103,6 +137,15 @@ public class AuthenticationController extends BaseController {
         }
     }
 
+    /**
+     * Retrieves a paginated and sorted page of users and returns it as UserResponse objects.
+     *
+     * @param page the zero-based page index to retrieve (default 0)
+     * @param size the number of users per page (default 10)
+     * @param sortBy the user field to sort by (default "firstName")
+     * @param direction the sort direction, either "asc" or "desc" (default "asc")
+     * @return a ResponseEntity containing an ApiResponse whose data is a Page of UserResponse for the requested page and sort order
+     */
     @GetMapping("/all-users")
     public ResponseEntity<ApiResponse<Page<UserResponse>>> getAllUsers(@RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -120,6 +163,11 @@ public class AuthenticationController extends BaseController {
                 HttpStatus.OK, CustomHttpStatus.S_FETCH_U);
     }
 
+    /**
+     * Performs logout for the current request and clears the security context.
+     *
+     * @return an ApiResponse containing an empty List<String> and a logout success status
+     */
     @PostMapping("/logout")
     public ResponseEntity<ApiResponse<List<String>>> logout(HttpServletRequest request,
             HttpServletResponse response,

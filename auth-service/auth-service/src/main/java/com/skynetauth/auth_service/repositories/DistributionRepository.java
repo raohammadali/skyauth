@@ -7,5 +7,11 @@ import com.skynetauth.auth_service.models.Distribution;
 
 @Repository
 public interface DistributionRepository extends JpaRepository<Distribution, Long> {
-    List<Distribution> findByNameIn(List<String> names);
+    /**
+ * Finds distributions whose name matches any value in the provided list.
+ *
+ * @param names list of distribution names to match
+ * @return a list of Distribution entities whose `name` equals any value in `names`; an empty list if none match
+ */
+List<Distribution> findByNameIn(List<String> names);
 }
