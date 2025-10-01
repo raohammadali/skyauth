@@ -1,0 +1,75 @@
+# 🚀 Microservices Setup Guide
+
+## 📥 Step 0: Pre Requisites
+# 1. MS SQL
+# 2. Docker Desktop
+
+
+# Follow these simple steps to clone, build, and run the entire microservices system using Docker and Maven.
+## 📥 Step 1: Clone All Repositories
+
+# Make sure to clone **all the required repositories** into the same root directory.
+# ```bash
+# git clone <repository-url-1>
+# git clone <repository-url-2>
+# # ...repeat for all microservices
+# ````
+
+
+## 📦 Step 2: Install Dependencies
+
+# Navigate to each service directory and run:
+# ```bash
+# mvn clean package
+# ```
+# ✅ **Note:** Some IDEs or extensions (like VS Code or IntelliJ) can do this step automatically.
+
+---
+
+## 🐳 Step 3: Run All Microservices with Docker
+
+# Make sure Docker is installed and running.
+# Run the following command **from the root directory** to start all services using Docker Compose:
+
+# ```bash
+ <!-- docker compose -f be-registery/docker-compose.yml -f be-api-gateway/docker-compose.yml -f be-auth-user/docker-compose.yml -f be-auth-user/docker-compose.db.yml -f be-notify-audit/docker-compose.yml -f be-notify-audit/docker-compose.db.yml -f be-auth-user/docker-compose.kafka.yml -f be-auth-user/docker-compose.seeder.yml up --build -->
+# ```
+
+# ---
+
+## 🛠️ Step 4: Create Docker Network (if not already created)
+
+# Before running services, ensure the Docker network exists:
+
+# ```bash
+# docker network create microservice-network
+# ```
+
+---
+
+## 🗄️ Step 5: Connect to the Database (Optional)
+
+# To connect manually to the SQL Server instance, use:
+# bash
+# sqlcmd -S 127.0.0.1,1434 -U SA -P "Click@123RaoHammad*1"
+
+# > Make sure to use the correct port and credentials as configured in your Docker Compose files.
+
+## 🌐 Accessing the Services
+
+# | Feature          | URL/Port                                                                       | Description                        |
+# | ---------------- | ------------------------------------------------------------------------------ | ---------------------------------- |
+# | 🧭 Eureka Server | [http://localhost:8671](http://localhost:8671)                                 | View registered microservices      |
+# | 📨 Kafka UI      | [http://localhost:8088](http://localhost:8088)                                 | Monitor Kafka messages & consumers |
+# | 📚 Swagger Docs  | [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) | View API documentation via Gateway |
+
+# ---
+
+## ✅ You're All Set!
+
+# All services should now be running. You can:
+# * Monitor service registration on Eureka
+# * View API documentation on Swagger
+# * Inspect messaging activity on Kafka UI
+
+# Happy developing! 🎉

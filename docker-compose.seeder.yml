@@ -1,0 +1,29 @@
+version: '3.8'
+
+networks:
+  microservice-network:
+    external: true
+
+
+services:
+  auth-seeder:
+    build:
+      context: ../be-auth-user/auth-service/auth-service
+    container_name: auth-seeder
+    command: ["--seeder=user,distribution"]
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://auth-db:1433;databaseName=skynetWafiUserAuthDB;encrypt=false;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=sa
+      - SPRING_DATASOURCE_PASSWORD=Click@123RaoHammad*1
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.SQLServerDialect
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_PRODUCER_PROPERTIES_MAX_REQUEST_SIZE=20971520
+    depends_on:
+      - auth-db
+      - eureka-server
+    networks:
+      - microservice-network
+    restart: "no"
