@@ -31,11 +31,11 @@ public class DistributionController extends BaseController {
     @GetMapping("/distribution")
     public ResponseEntity<ApiResponse<List<DistributionDto>>> getAllDistribution() {
         try {
-            List<Distribution> distributions = distributionService.getAllRolesWithPermissions();
+            List<Distribution> distributions = distributionService.getAllDistributions();
             List<DistributionDto> distDTOs = distributionMapper.toDistributionDtos(distributions);
             return this.buildResponse(distDTOs, true, HttpStatus.OK, CustomHttpStatus.S_DIST);
         } catch (Exception e) {
-            return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.E_UNAUTHORIZED);
+            return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.SERVER_ERROR);
         }
     }
 

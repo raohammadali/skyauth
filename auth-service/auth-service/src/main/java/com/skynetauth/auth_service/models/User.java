@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.skynetauth.auth_service.Enum.UserType;
 import com.skynetauth.auth_service.config.Auditable;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -18,6 +19,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -50,6 +52,9 @@ public class User extends Auditable {
 
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    private RefreshToken refreshToken;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "user_roles", 
@@ -75,27 +80,14 @@ public class User extends Auditable {
     )
     private Set<SoldTo> sold_tos = new HashSet<>();
 
-    @ManyToMany(mappedBy = "users") 
+    @ManyToMany(fetch = FetchType.EAGER) 
+    @JoinTable(
+        name = "distribution_users",
+        joinColumns = @JoinColumn(name = "users_id"),
+        inverseJoinColumns = @JoinColumn(name = "distributions_id")
+    )
     @JsonBackReference
     private List<Distribution> distributions;
 
     
 }
-
-// @Entity
-// public class User {
-//     @Id @GeneratedValue
-//     private Long id;
-
-//     private String name;
-//     private String email;
-//     private String password;
-
-//     @ManyToMany(fetch = FetchType.EAGER)
-//     private Set<Role> roles = new HashSet<>();
-
-//     @ManyToMany(fetch = FetchType.EAGER)
-//     private Set<Permission> permissions = new HashSet<>();
-
-//     // Account relation logic (optional foreign keys or linking tables)
-// }

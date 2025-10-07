@@ -31,17 +31,6 @@ public class RoleController extends BaseController {
         this.roleMapper = roleMapper;
     }
 
-    // @GetMapping("/roles")
-    // public ResponseEntity<ApiResponse<List<RoleDto>>> getAllRoles() {
-    //     try {
-    //         List<Role> roles = roleService.getAllRolesWithPermissions();
-    //         List<RoleDto> roleDTOs = roleMapper.toRoleDtos(roles);
-    //         return this.buildResponse(roleDTOs, true, HttpStatus.OK, CustomHttpStatus.S_ROLE);
-    //     } catch (Exception e) {
-    //         return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.E_UNAUTHORIZED);
-    //     }
-    // }
-
     @GetMapping("/roles")
     public ResponseEntity<ApiResponse<List<RoleDto>>> getRolesByUserType(@RequestParam UserType userType) {
         List<Role> roles = roleService.getRolesOfUserType(userType);

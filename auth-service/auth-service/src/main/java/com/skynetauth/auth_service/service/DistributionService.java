@@ -16,8 +16,7 @@ public class DistributionService {
     public DistributionService(DistributionRepository distributionRepository) {
         this.distributionRepository = distributionRepository;
     }
-
-    public List<Distribution> getAllRolesWithPermissions() {
+    public List<Distribution> getAllDistributions() {
         return distributionRepository.findAll();
     }
 }

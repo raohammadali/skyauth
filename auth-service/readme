@@ -32,7 +32,7 @@
 # Run the following command **from the root directory** to start all services using Docker Compose:
 
 # ```bash
- <!-- docker compose -f be-registery/docker-compose.yml -f be-api-gateway/docker-compose.yml -f be-auth-user/docker-compose.yml -f be-auth-user/docker-compose.db.yml -f be-notify-audit/docker-compose.yml -f be-notify-audit/docker-compose.db.yml -f be-auth-user/docker-compose.kafka.yml -f be-auth-user/docker-compose.seeder.yml up --build -->
+ <!-- docker compose -f be-auth-user/docker-compose.yml -f be-registery/docker-compose.yml -f be-api-gateway/docker-compose.yml  -f be-auth-user/docker-compose.db.yml -f be-notify-audit/docker-compose.yml -f be-notify-audit/docker-compose.db.yml -f be-auth-user/docker-compose.kafka.yml -f be-auth-user/docker-compose.seeder.yml up --build -->
 # ```
 
 # ---

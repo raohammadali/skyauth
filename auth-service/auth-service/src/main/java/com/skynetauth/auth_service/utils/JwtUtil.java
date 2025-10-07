@@ -6,10 +6,6 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.JWTVerifier;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.skynetauth.auth_service.exceptions.InvalidJWTTokenException;
 import com.skynetauth.auth_service.models.Permission;
 import com.skynetauth.auth_service.models.Role;
@@ -69,21 +65,10 @@ public class JwtUtil {
 
     public boolean validateToken(String token) {
         try {
-            // Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
             Jwts.parserBuilder().setSigningKey(getSigningKey()).build().parseClaimsJws(token);
             return true;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    public boolean verifyToken(String token) throws JWTVerificationException {
-        try {
-            Algorithm algorithm = Algorithm.HMAC512(SECRET_KEY);
-            JWTVerifier verifier = JWT.require(algorithm).build();
-            return verifier.verify(token).getExpiresAt().after(new Date());
-        } catch (JWTVerificationException e) {
-            throw new InvalidJWTTokenException();
         }
     }
 

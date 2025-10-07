@@ -1,6 +1,8 @@
 package com.skynetauth.auth_service.models;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -13,7 +15,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
@@ -32,39 +33,17 @@ public class Distribution extends Auditable {
     private long id;
 
     private String name;
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "distributions")
     @JsonManagedReference
-    @JoinTable(
-        name = "distribution_users", 
-        joinColumns = @JoinColumn(name = "distributions_id"),
-        inverseJoinColumns = @JoinColumn(name = "users_id")
-    )
     private Set<User> users = new HashSet<>();
+
     @ManyToOne
     @JsonBackReference
     @JoinColumn(name = "divisions_id")   
     private Division divisions;
 
-    @OneToMany(mappedBy = "distributions", fetch = FetchType.EAGER)
-    private Set<SoldTo> soldTos = new HashSet<>();
+    @OneToMany(mappedBy = "distributions", fetch = FetchType.LAZY)
+    private List<SoldTo> soldTos = new ArrayList<>();
 
 
 }
-
-// @Entity
-// public class User {
-//     @Id @GeneratedValue
-//     private Long id;
-
-//     private String name;
-//     private String email;
-//     private String password;
-
-//     @ManyToMany(fetch = FetchType.EAGER)
-//     private Set<Role> roles = new HashSet<>();
-
-//     @ManyToMany(fetch = FetchType.EAGER)
-//     private Set<Permission> permissions = new HashSet<>();
-
-//     // Account relation logic (optional foreign keys or linking tables)
-// }

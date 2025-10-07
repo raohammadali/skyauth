@@ -1,26 +1,40 @@
 package com.skynetauth.auth_service.producer;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import com.skynetauth.auth_service.dto.dto.UserEventDto;
+import com.skynetauth.auth_service.mapper.UserEventMapper;
 import com.skynetauth.auth_service.models.User;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @Service
 public class UserEventProducer {
 
-    private static final String TOPIC = "logs";
+    @Value("${kafka.topics.user-events}")
+    private String userEventsTopic;
 
-    @Autowired
-    private KafkaTemplate<String, UserEventDto> kafkaTemplate;
+    private final KafkaTemplate<String, UserEventDto> kafkaTemplate;
+
+
+    public UserEventProducer(KafkaTemplate<String, UserEventDto> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+
+    }
 
     public void sendUserCreatedEvent(User user) {
-        System.out.println(String.format("Producing user created event for user: %s", user.getFirstName()));
-        UserEventDto userEvent = new UserEventDto();
-        userEvent.setFirstName(user.getFirstName());
-        userEvent.setLastName(user.getLastName());
-        userEvent.setPhone(user.getPhone());
-        kafkaTemplate.send(TOPIC, userEvent);
-        System.out.println(String.format("Producing user created event for user done"));
+        UserEventDto userEvent = new UserEventMapper().toDto(user);
+        kafkaTemplate.send(userEventsTopic, userEvent)
+        .whenComplete((result, ex) -> {
+            if (ex != null) {
+                log.error("Failed to produce user created event for user: {}", user.getFirstName(), ex);
+            } else {
+                log.info("Successfully produced user created event for user: {} to partition: {}",
+                user.getFirstName(), result.getRecordMetadata().partition());
+            }
+        });
     }
 }

@@ -25,7 +25,7 @@ public class Division extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String name;   
-    @OneToMany(mappedBy = "divisions", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "divisions", fetch = FetchType.LAZY)
     @JsonManagedReference
     private Set<Distribution> distributions = new HashSet<>();
 }

@@ -18,7 +18,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         
         Server gatewayServer = new Server();
-        gatewayServer.setUrl("http://127.0.0.1:8080/auth-service"); 
+        gatewayServer.setUrl("http://127.0.0.1:8081"); 
         gatewayServer.setDescription("API Gateway URL");
 
         return new OpenAPI()

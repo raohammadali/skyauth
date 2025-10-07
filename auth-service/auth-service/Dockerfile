@@ -13,7 +13,7 @@ FROM openjdk:24-jdk-slim
 WORKDIR /auth-service
 
 # Copy the built JAR from stage 1
-COPY --from=build /app/target/auth-service-0.0.1-SNAPSHOT.jar  .
+COPY --from=build /app/target/auth-service-0.0.1-SNAPSHOT.jar .
 
 EXPOSE 8081
 ENTRYPOINT ["java", "-jar", "auth-service-0.0.1-SNAPSHOT.jar"]

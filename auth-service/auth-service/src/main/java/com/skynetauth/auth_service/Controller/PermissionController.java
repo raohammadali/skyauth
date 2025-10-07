@@ -28,26 +28,14 @@ public class PermissionController extends BaseController {
     public PermissionController(PermissionService permissionService, PermissionMapper permissionMapper) {
         this.permissionService = permissionService;
         this.permissionMapper = permissionMapper;
-    }
-    
-    // @GetMapping("/permissions")
-    // public ResponseEntity<ApiResponse<List<PermissionDto>>> getAllPermissions() {
-    //     try {
-    //         List<Permission> permissions = permissionService.getAllPermissions();
-    //         List<PermissionDto> permissionDTOs = permissionMapper.toPermissionDtos(permissions);
-    //         return this.buildResponse(permissionDTOs, true, HttpStatus.OK, CustomHttpStatus.S_DIST);
-    //     } catch (Exception e) {
-    //         return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.E_UNAUTHORIZED);
-    //     }
-    // }
-    
+    }    
     @GetMapping("/permissions")
     public ResponseEntity<ApiResponse<List<PermissionDto>>> getAllPermissions(@RequestParam UserType userType) {
         try {
             List<Permission> permissions = permissionService.getPermissionsByUserType(userType);
-            return this.buildResponse(permissionMapper.toPermissionDtos(permissions), true, HttpStatus.OK, CustomHttpStatus.S_DIST);
+            return this.buildResponse(permissionMapper.toPermissionDtos(permissions), true, HttpStatus.OK, CustomHttpStatus.S_PERMISSION);
         } catch (Exception e) {
-            return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.E_UNAUTHORIZED);
+            return this.buildResponse(null, false, HttpStatus.INTERNAL_SERVER_ERROR, CustomHttpStatus.SERVER_ERROR);
         }
     }
 }

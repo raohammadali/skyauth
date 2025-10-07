@@ -1,16 +1,13 @@
 package com.skynetauth.auth_service.dto.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LogMessageDto {
     private String level;
     private String message;
-
-    public LogMessageDto() {}
-
-    public LogMessageDto(String level, String message) {
-        this.level = level;
-        this.message = message;
-    }
 }

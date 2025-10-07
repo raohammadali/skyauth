@@ -13,6 +13,8 @@ services:
     ports:
       - "9092:9092"
       - "9093:9093"
+    env_file:
+      - .env
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_BROKER_ID: 1
@@ -23,7 +25,6 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
       KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
       KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
-      CLUSTER_ID: 'EmptNWtoR4GGWx-BH6nGLQ'
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_DEFAULT_REPLICATION_FACTOR: 1
@@ -31,11 +32,11 @@ services:
       KAFKA_MESSAGE_MAX_BYTES: 200000000
       KAFKA_REPLICA_FETCH_MAX_BYTES: 200000000
       KAFKA_MAX_REQUEST_SIZE: 200000000
+      CLUSTER_ID: ${CLUSTER_ID}
     volumes:
       - kafka_data:/var/lib/kafka/data
     networks:
       - microservice-network
-
 
   kafka-ui:
     image: provectuslabs/kafka-ui:latest

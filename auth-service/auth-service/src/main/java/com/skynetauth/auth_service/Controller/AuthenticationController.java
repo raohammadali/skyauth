@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.skynetauth.auth_service.Enum.CustomHttpStatus;
 import com.skynetauth.auth_service.dto.request.ImpersonateRequest;
 import com.skynetauth.auth_service.dto.request.LoginRequest;
+import com.skynetauth.auth_service.dto.request.RefreshRequest;
 import com.skynetauth.auth_service.dto.request.SignupRequest;
 import com.skynetauth.auth_service.dto.request.UpdateRequest;
 import com.skynetauth.auth_service.dto.response.ApiResponse;
@@ -30,9 +31,11 @@ import com.skynetauth.auth_service.dto.response.LoginResponse;
 import com.skynetauth.auth_service.dto.response.UserResponse;
 import com.skynetauth.auth_service.exceptions.InvalidIDException;
 import com.skynetauth.auth_service.mapper.UserMapper;
+import com.skynetauth.auth_service.models.RefreshToken;
 import com.skynetauth.auth_service.models.User;
 import com.skynetauth.auth_service.service.AuthenticationService;
 import com.skynetauth.auth_service.service.CustomUserDetailsService;
+import com.skynetauth.auth_service.service.RefreshTokenService;
 import com.skynetauth.auth_service.utils.HashIdUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -47,16 +50,22 @@ public class AuthenticationController extends BaseController {
     private final CustomUserDetailsService userService;
 
     private final AuthenticationService authService;
+    private final RefreshTokenService refreshTokenService;
 
     private final SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
 
     private final HashIdUtil hashIdUtil;
 
+    private final UserMapper userMapper;
+
     public AuthenticationController(CustomUserDetailsService userService,
-            AuthenticationService authService, HashIdUtil hashIdUtil) {
+            AuthenticationService authService, HashIdUtil hashIdUtil, UserMapper userMapper,
+            RefreshTokenService refreshTokenService) {
         this.userService = userService;
         this.authService = authService;
         this.hashIdUtil = hashIdUtil;
+        this.userMapper = userMapper;
+        this.refreshTokenService = refreshTokenService;
     }
 
     @PostMapping("/login")
@@ -69,10 +78,9 @@ public class AuthenticationController extends BaseController {
     }
 
     @PreAuthorize("hasAuthority('CAN_CREATE_USERS')")
-    @PostMapping("/signup")
+    @PostMapping("/shop-account")
     public ResponseEntity<ApiResponse<UserResponse>> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
         User user = userService.createUser(signupRequest);
-        UserMapper userMapper = new UserMapper(hashIdUtil);
         return this.buildResponse(userMapper.toUserResponse(user), true,
                 HttpStatus.OK, CustomHttpStatus.S_SIGNUP);
     }
@@ -80,7 +88,6 @@ public class AuthenticationController extends BaseController {
     @PostMapping("/update/{id}")
     public ResponseEntity<ApiResponse<UserResponse>> editUser(@RequestBody @Valid UpdateRequest dto,
             @PathVariable String id) {
-        UserMapper userMapper = new UserMapper(hashIdUtil);
         try {
             Long decodedId = hashIdUtil.decodeId(id);
             return this.buildResponse(userMapper.toUserResponse(userService.editUser(dto, decodedId)), true,
@@ -113,11 +120,29 @@ public class AuthenticationController extends BaseController {
         PageRequest pageRequest = PageRequest.of(page, size, sort);
         Page<User> userPage = userService.getUsers(pageRequest);
 
-        UserMapper userMapper = new UserMapper(hashIdUtil);
         Page<UserResponse> userResponsePage = userPage.map(userMapper::toUserResponse);
 
         return this.buildResponse(userResponsePage, true,
                 HttpStatus.OK, CustomHttpStatus.S_FETCH_U);
+    }
+
+    @PostMapping("/refresh-token")
+    public ResponseEntity<ApiResponse<LoginResponse>> refreshToken(@RequestBody @Valid RefreshRequest refreshRequest) {
+        try {
+            RefreshToken refreshToken = refreshTokenService.findByToken(refreshRequest.getRefreshToken());
+            if(!(refreshToken instanceof RefreshToken)){
+                throw new RuntimeException("Invalid refresh token");
+            }
+            if(refreshTokenService.isTokenExpired(refreshToken)){
+                refreshTokenService.delete(refreshToken);
+                throw new RuntimeException("Refresh token has expired");
+            }
+            LoginResponse newJwt = refreshTokenService.generateAccessToken(refreshToken.getUser(), refreshToken.getToken());
+
+            return this.buildResponse(newJwt, true, HttpStatus.OK, CustomHttpStatus.S_LOGIN);
+        } catch (Exception e) {
+            return this.buildResponse(null, false, HttpStatus.BAD_REQUEST, CustomHttpStatus.SERVER_ERROR);
+        }
     }
 
     @PostMapping("/logout")

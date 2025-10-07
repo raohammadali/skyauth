@@ -27,8 +27,12 @@ public class GlobalExceptionHandler extends BaseController {
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors()
-                .forEach(error -> errors.put(((FieldError) error).getField(), error.getDefaultMessage()));
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+        if (error instanceof FieldError fieldError) {
+            errors.put(fieldError.getField(), fieldError.getDefaultMessage());
+        } else {
+            errors.put(error.getObjectName(), error.getDefaultMessage());
+        }});
         return this.buildResponse(errors, false,
                 HttpStatus.BAD_REQUEST, CustomHttpStatus.E_INVALID_INPUT);
     }

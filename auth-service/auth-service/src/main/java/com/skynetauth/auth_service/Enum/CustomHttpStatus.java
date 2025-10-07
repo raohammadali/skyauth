@@ -8,7 +8,7 @@ public enum CustomHttpStatus {
     S_ROLE(204),
     S_UPDATE(205),
     S_FETCH_U(206),
-
+    S_PERMISSION(207),  
     E_INVALID_INPUT(400),
     E_UNAUTHORIZED(401),
     E_INVALID_ROLE_ID(402),

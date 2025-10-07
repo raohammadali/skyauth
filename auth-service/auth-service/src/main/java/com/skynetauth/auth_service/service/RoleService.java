@@ -3,6 +3,7 @@ package com.skynetauth.auth_service.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.skynetauth.auth_service.Enum.UserType;
 import com.skynetauth.auth_service.models.Role;
@@ -16,10 +17,12 @@ public class RoleService {
         this.roleRepository = roleRepository;
     }
 
-    public List<Role> getAllRolesWithPermissions() {
+
+     @Transactional(readOnly = true)
+    public List<Role> getAllRoles() {
         return roleRepository.findAll();
     }
-
+    @Transactional(readOnly = true)
     public List<Role> getRolesOfUserType(UserType userType) {
         return roleRepository.findByUserType(userType);
     }
