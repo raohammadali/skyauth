@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+
+  auth-service:
+    build:
+      context: ../be-auth-user/auth-service/auth-service
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    env_file:
+      - .env
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka
+      - SPRING_DATASOURCE_URL=jdbc:sqlserver://auth-db:1433;databaseName=skynetWafiUserAuthDB;encrypt=false;trustServerCertificate=true
+      - SPRING_DATASOURCE_USERNAME=${SPRING_DATASOURCE_USERNAME}
+      - SPRING_DATASOURCE_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.SQLServerDialect
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - SPRING_KAFKA_PRODUCER_PROPERTIES_MAX_REQUEST_SIZE=20971520
+    networks:
+      - microservice-network
+    depends_on:
+      - eureka-server
+      - auth-db
+      - kafka
+    restart: always
+  eureka-server:
+      build:
+        context: ../be-registery/skynet-eureka-server/skynet-eureka-server
+      container_name: eureka-server
+      ports:
+        - "8761:8761"
+      networks:
+        - microservice-network
+      restart: always
+  auth-db:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    container_name: auth-db
+    env_file:
+      - .env
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${SPRING_DATASOURCE_PASSWORD}
+    ports:
+      - "1434:1433"
+    networks:
+      - microservice-network
+    volumes:
+      - auth_db_data:/var/opt/mssql
+    restart: always
+    healthcheck:
+      test: [ "CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "${SA_PASSWORD}", "-Q", "SELECT 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    hostname: kafka
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "9093:9093"
+    env_file:
+      - .env
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_BROKER_ID: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:9093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:9092,CONTROLLER://kafka:9093'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:9092'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_MIN_INSYNC_REPLICAS: 1
+      KAFKA_MESSAGE_MAX_BYTES: 200000000
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 200000000
+      KAFKA_MAX_REQUEST_SIZE: 200000000
+      CLUSTER_ID: ${CLUSTER_ID}
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    networks:
+      - microservice-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    ports:
+      - "8088:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    depends_on:
+      - kafka
+    networks:
+      - microservice-network
+networks:
+  microservice-network:
+    external: true
+volumes:
+  kafka_data:
+    external: true
+  auth_db_data:
+    external: true
